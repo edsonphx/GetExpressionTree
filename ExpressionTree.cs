@@ -7,7 +7,6 @@ namespace Core
 {
     public class ExpressionTree
     {
-        public Expression Expression { get; set; }
         public IDictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> Value { get; set; }
         public IList<KeyValuePair<int, Side>> Keys { get; set; }
         public Type Type { get; set; }
@@ -17,7 +16,6 @@ namespace Core
 
         public ExpressionTree(Expression exp, Type type)
         {
-            Expression = exp;
             Value = new Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>>();
             Keys = new List<KeyValuePair<int, Side>>();
             Type = type;
@@ -31,6 +29,12 @@ namespace Core
             Parameters = GetParameters();
             Constants = GetConstants();
         }
+
+        public IDictionary<Side, Expression> GetValueByKey(KeyValuePair<int, Side> key)
+        {
+            return Value[key];
+        }
+
         private void GenerateExpressionTree(Expression exp, int depth = 0, Side side = Side.None)
         {
             var key = CreateKey(depth, side);
@@ -125,6 +129,7 @@ namespace Core
         public static void Main(string[] args)
         {
             Expression<Func<int, int, int>> exp = (x, y) => x + y + 1 + 3;
+
             var expressionTree = new ExpressionTree(exp.Body, exp.Type);
         }
     }
