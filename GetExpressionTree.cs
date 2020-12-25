@@ -6,8 +6,8 @@ namespace Core
 {
     public class GetExpressionTree
     {
-        private static Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> _expressionTree = new Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>>();
-        private static List<KeyValuePair<int, Side>> _keys = new List<KeyValuePair<int, Side>>();
+        private Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> _expressionTree = new Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>>();
+        private List<KeyValuePair<int, Side>> _keys = new List<KeyValuePair<int, Side>>();
         public static void Main(string[] args)
         {
             new GetExpressionTree().Start();
@@ -102,7 +102,6 @@ namespace Core
                 {
                     if (dict[key][Side.None].NodeType == ExpressionType.Parameter)
                     {
-
                         numberOfParameters += 1;
                     }
                 }
@@ -121,7 +120,6 @@ namespace Core
                 {
                     if (dict[key][Side.None].NodeType == ExpressionType.Constant)
                     {
-
                         numberOfParameters += 1;
                     }
                 }
