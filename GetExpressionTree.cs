@@ -4,32 +4,81 @@ using System.Linq.Expressions;
 
 namespace Core
 {
-    public class GetExpressionTree
+    public class ExpressionTree
     {
-        private Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> _expressionTree = new Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>>();
-        private List<KeyValuePair<int, Side>> _keys = new List<KeyValuePair<int, Side>>();
-        public static void Main(string[] args)
-        {
-            new GetExpressionTree().Start();
-        }
-        public void Start()
-        {
-            Expression<Func<int, int, int>> exp = (x, y) => x + y + 1 + 3;
-            GenerateExpressionTree(exp.Body);
+        private Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> Value { get; set; }
+        private List<KeyValuePair<int, Side>> Keys { get; set; }
 
-            Console.WriteLine(_expressionTree.CountNumberOfVars(_keys));
-            Console.WriteLine(_expressionTree.CountNumberOfParameters(_keys));
-            Console.WriteLine(_expressionTree.CountNumberOfConstants(_keys));
+        public ExpressionTree(Expression exp)
+        {
+            Value = new Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>>();
+            Keys = new List<KeyValuePair<int, Side>>();
+            Start(exp);
         }
 
+        private void Start(Expression exp)
+        {
+            GenerateExpressionTree(exp);
+        }
+
+        public int CountNumberOfVars()
+        {
+            int numberOfVars = 0;
+
+            foreach (var key in Keys)
+            {
+                if (Value[key].ContainsKey(Side.None))
+                {
+                    numberOfVars += 1;
+                }
+            }
+
+            return numberOfVars;
+        }
+
+        public int CountNumberOfParameters()
+        {
+            int numberOfParameters = 0;
+
+            foreach (var key in Keys)
+            {
+                if (Value[key].ContainsKey(Side.None))
+                {
+                    if (Value[key][Side.None].NodeType == ExpressionType.Parameter)
+                    {
+                        numberOfParameters += 1;
+                    }
+                }
+            }
+
+            return numberOfParameters;
+        }
+
+        public int CountNumberOfConstants()
+        {
+            int numberOfParameters = 0;
+
+            foreach (var key in Keys)
+            {
+                if (Value[key].ContainsKey(Side.None))
+                {
+                    if (Value[key][Side.None].NodeType == ExpressionType.Constant)
+                    {
+                        numberOfParameters += 1;
+                    }
+                }
+            }
+
+            return numberOfParameters;
+        }
         private void GenerateExpressionTree(Expression exp, int depth = 0, Side side = Side.None)
         {
             var key = CreateKey(depth, side);
-            _keys.Add(key);
+            Keys.Add(key);
 
             if (exp.NodeType == ExpressionType.Constant || exp.NodeType == ExpressionType.Parameter)
             {
-                _expressionTree[key] = CreateValues(exp);
+                Value[key] = CreateValues(exp);
             }
             else
             {
@@ -37,7 +86,7 @@ namespace Core
 
                 var value = CreateValues(bExp);
 
-                _expressionTree[key] = value;
+                Value[key] = value;
 
                 depth += 1;
                 GenerateExpressionTree(bExp.Left, depth, Side.Left);
@@ -68,6 +117,12 @@ namespace Core
 
             return dict;
         }
+
+        public static void Main(string[] args)
+        {
+            Expression<Func<int, int, int>> exp = (x, y) => x + y + 1 + 3;
+            var expressionTree = new ExpressionTree(exp.Body);
+        }
     }
     public enum Side
     {
@@ -75,57 +130,3 @@ namespace Core
         Left = 0,
         Right = 1
     }
-    public static class ExtensionMethods
-    {
-        public static int CountNumberOfVars(this Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> dict, IEnumerable<KeyValuePair<int, Side>> keys)
-        {
-            int numberOfVars = 0;
-
-            foreach (var key in keys)
-            {
-                if (dict[key].ContainsKey(Side.None))
-                {
-                    numberOfVars += 1;
-                }
-            }
-
-            return numberOfVars;
-        }
-
-        public static int CountNumberOfParameters(this Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> dict, IEnumerable<KeyValuePair<int, Side>> keys)
-        {
-            int numberOfParameters = 0;
-
-            foreach (var key in keys)
-            {
-                if (dict[key].ContainsKey(Side.None))
-                {
-                    if (dict[key][Side.None].NodeType == ExpressionType.Parameter)
-                    {
-                        numberOfParameters += 1;
-                    }
-                }
-            }
-
-            return numberOfParameters;
-        }
-
-        public static int CountNumberOfConstants(this Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> dict, IEnumerable<KeyValuePair<int, Side>> keys)
-        {
-            int numberOfParameters = 0;
-
-            foreach (var key in keys)
-            {
-                if (dict[key].ContainsKey(Side.None))
-                {
-                    if (dict[key][Side.None].NodeType == ExpressionType.Constant)
-                    {
-                        numberOfParameters += 1;
-                    }
-                }
-            }
-
-            return numberOfParameters;
-        }
-    }
-}
