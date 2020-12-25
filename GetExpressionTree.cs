@@ -14,10 +14,12 @@ namespace Core
         }
         public void Start()
         {
-            Expression<Func<int, int, int>> exp = (x, y) => 8 + x + y + 1 + 3 + 1 + 3;
-            GenerateExpressionTree(exp.Body, 0);
-            
-            _expressionTree.CountNumberOfVars(_keys);
+            Expression<Func<int, int, int>> exp = (x, y) => x + y + 1 + 3;
+            GenerateExpressionTree(exp.Body);
+
+            Console.WriteLine(_expressionTree.CountNumberOfVars(_keys));
+            Console.WriteLine(_expressionTree.CountNumberOfParameters(_keys));
+            Console.WriteLine(_expressionTree.CountNumberOfConstants(_keys));
         }
 
         private void GenerateExpressionTree(Expression exp, int depth = 0, Side side = Side.None)
@@ -54,7 +56,7 @@ namespace Core
 
             var bExp = exp as BinaryExpression;
 
-            if(bExp != null)
+            if (bExp != null)
             {
                 dict[Side.Left] = bExp.Left;
                 dict[Side.Right] = bExp.Right;
