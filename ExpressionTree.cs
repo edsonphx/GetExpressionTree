@@ -7,12 +7,12 @@ namespace Core
 {
     public class ExpressionTree
     {
-        public IDictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> Value { get; set; }
-        public IList<KeyValuePair<int, Side>> Keys { get; set; }
-        public Type Type { get; set; }
-        public int Depth { get; set; }
-        public IEnumerable<(Type Type, string Name)> Parameters { get; set; }
-        public IEnumerable<(Type Type, object Value)> Constants { get; set; }
+        public IDictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> Value { get; private set; }
+        public IList<KeyValuePair<int, Side>> Keys { get; private set; }
+        public Type Type { get; private set; }
+        public int Depth { get; private set; }
+        public IEnumerable<(Type Type, string Name)> Parameters { get; private set; }
+        public IEnumerable<(Type Type, object Value)> Constants { get; private set; }
 
         public ExpressionTree(Expression exp, Type type)
         {
@@ -25,9 +25,10 @@ namespace Core
         private void Start(Expression exp)
         {
             GenerateExpressionTree(exp);
-            Depth = GetDepth();
-            Parameters = GetParameters();
-            Constants = GetConstants();
+
+            GetDepth();
+            GetConstants();
+            GetParameters();
         }
 
         public IDictionary<Side, Expression> GetValueByKey(KeyValuePair<int, Side> key)
@@ -81,12 +82,12 @@ namespace Core
 
             return dict;
         }
-        private int GetDepth()
+        private void GetDepth()
         {
-            return Value.Keys.OrderByDescending(x => x.Key).First().Key;
+            Depth = Value.Keys.OrderByDescending(x => x.Key).First().Key;
         }
 
-        private IEnumerable<(Type Type, string Name)> GetParameters()
+        private void GetParameters()
         {
             var result = new List<(Type Type, string Name)>();
 
@@ -103,10 +104,10 @@ namespace Core
                 }
             }
 
-            return result;
+            Parameters = result;
         }
 
-        private IEnumerable<(Type Type, object Value)> GetConstants()
+        private void GetConstants()
         {
             var result = new List<(Type Type, object Value)>();
 
@@ -123,7 +124,7 @@ namespace Core
                 }
             }
 
-            return result;
+            Constants = result;
         }
 
         public static void Main(string[] args)
