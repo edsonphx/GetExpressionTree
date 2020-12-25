@@ -17,7 +17,7 @@ namespace Core
             Expression<Func<int, int, int>> exp = (x, y) => 8 + x + y + 1 + 3 + 1 + 3;
             GenerateExpressionTree(exp.Body, 0);
             
-            _expressionTree.CountNumberOfVar(_keys);
+            _expressionTree.CountNumberOfVars(_keys);
         }
 
         private void GenerateExpressionTree(Expression exp, int depth = 0, Side side = Side.None)
@@ -75,19 +75,19 @@ namespace Core
     }
     public static class ExtensionMethods
     {
-        public static int CountNumberOfVar(this Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> dict, IEnumerable<KeyValuePair<int, Side>> keys)
+        public static int CountNumberOfVars(this Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> dict, IEnumerable<KeyValuePair<int, Side>> keys)
         {
-            int numberOfVar = 0;
+            int numberOfVars = 0;
 
             foreach (var key in keys)
             {
                 if (dict[key].ContainsKey(Side.None))
                 {
-                    numberOfVar += 1;
+                    numberOfVars += 1;
                 }
             }
 
-            return numberOfVar;
+            return numberOfVars;
         }
 
         public static int CountNumberOfParameters(this Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> dict, IEnumerable<KeyValuePair<int, Side>> keys)
