@@ -7,21 +7,27 @@ namespace Core
 {
     public class ExpressionTree
     {
-        private Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> Value { get; set; }
-        private List<KeyValuePair<int, Side>> Keys { get; set; }
-        private int Depth { get; set; }
+        public IDictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> Value { get; set; }
+        public IList<KeyValuePair<int, Side>> Keys { get; set; }
+        public Type Type { get; set; }
+        public int Depth { get; set; }
+        public IEnumerable<(Type Type, string Name)> Parameters { get; set; }
+        public IEnumerable<(Type Type, object Value)> Constants { get; set; }
 
-        public ExpressionTree(Expression exp)
+        public ExpressionTree(Expression exp, Type type)
         {
             Value = new Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>>();
             Keys = new List<KeyValuePair<int, Side>>();
+            Type = type;
             Start(exp);
         }
 
         private void Start(Expression exp)
         {
             GenerateExpressionTree(exp);
-            Depth = Value.Keys.OrderByDescending(x => x.Key).First().Key;
+            Depth = GetDepth();
+            Parameters = GetParameters();
+            Constants = GetConstants();
         }
         private void GenerateExpressionTree(Expression exp, int depth = 0, Side side = Side.None)
         {
@@ -69,25 +75,14 @@ namespace Core
 
             return dict;
         }
-
-        public int CountNumberOfVars()
+        private int GetDepth()
         {
-            int numberOfVars = 0;
-
-            foreach (var key in Keys)
-            {
-                if (Value[key].ContainsKey(Side.None))
-                {
-                    numberOfVars += 1;
-                }
-            }
-
-            return numberOfVars;
+            return Value.Keys.OrderByDescending(x => x.Key).First().Key;
         }
 
-        public int CountNumberOfParameters()
+        private IEnumerable<(Type Type, string Name)> GetParameters()
         {
-            int numberOfParameters = 0;
+            var result = new List<(Type Type, string Name)>();
 
             foreach (var key in Keys)
             {
@@ -95,17 +90,19 @@ namespace Core
                 {
                     if (Value[key][Side.None].NodeType == ExpressionType.Parameter)
                     {
-                        numberOfParameters += 1;
+                        var param = Value[key][Side.None] as ParameterExpression;
+
+                        result.Add((param.Type, param.Name));
                     }
                 }
             }
 
-            return numberOfParameters;
+            return result;
         }
 
-        public int CountNumberOfConstants()
+        private IEnumerable<(Type Type, object Value)> GetConstants()
         {
-            int numberOfParameters = 0;
+            var result = new List<(Type Type, object Value)>();
 
             foreach (var key in Keys)
             {
@@ -113,18 +110,20 @@ namespace Core
                 {
                     if (Value[key][Side.None].NodeType == ExpressionType.Constant)
                     {
-                        numberOfParameters += 1;
+                        var param = Value[key][Side.None] as ConstantExpression;
+
+                        result.Add((param.Type, param.Value));
                     }
                 }
             }
 
-            return numberOfParameters;
+            return result;
         }
 
         public static void Main(string[] args)
         {
             Expression<Func<int, int, int>> exp = (x, y) => x + y + 1 + 3;
-            var expressionTree = new ExpressionTree(exp.Body);
+            var expressionTree = new ExpressionTree(exp.Body, exp.Type);
         }
     }
     public enum Side
