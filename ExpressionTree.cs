@@ -7,6 +7,7 @@ namespace Core
 {
     public class ExpressionTree
     {
+        public Expression Expression { get; set; }
         public IDictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>> Value { get; set; }
         public IList<KeyValuePair<int, Side>> Keys { get; set; }
         public Type Type { get; set; }
@@ -16,6 +17,7 @@ namespace Core
 
         public ExpressionTree(Expression exp, Type type)
         {
+            Expression = exp;
             Value = new Dictionary<KeyValuePair<int, Side>, Dictionary<Side, Expression>>();
             Keys = new List<KeyValuePair<int, Side>>();
             Type = type;
